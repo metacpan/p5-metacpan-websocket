@@ -1,0 +1,7 @@
+-pbp
+-nst
+
+# Break a line after opening/before closing token.
+-vt=0
+-vtc=0
+-et=4
