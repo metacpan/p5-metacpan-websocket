@@ -16,7 +16,8 @@ has config   => ( is => "ro", lazy => 1, builder => "_build_config" );
 has debug => ( is => "ro", default => sub { shift->config->{debug} } );
 
 sub _build_pocketio {
-	PocketIO->new( handler => sub { } );
+	my $self = shift;
+	PocketIO->new( handler => sub { $self->handler(@_) } );
 }
 
 sub _build_sockets {
@@ -32,8 +33,14 @@ sub _build_config {
 
 my $ws = __PACKAGE__->new;
 
-MetaCPAN::WebSocket::Log->new( ws => $ws, %{ $ws->config->{log} || {} } )
-	->initialize;
+# TODO: make all of this pluggable
+my $log = MetaCPAN::WebSocket::Log->new( ws => $ws,
+	%{ $ws->config->{log} || {} } )->initialize;
+
+sub handler {
+	my ( $self, @args ) = @_;
+	$_->handler(@args) for $log;
+}
 
 builder {
 	enable 'CrossOrigin',

@@ -6,9 +6,10 @@ use Path::Tiny ();
 use Data::Dumper;
 use JSON;
 
-has ws   => ( is => "ro" );
-has seek => ( is => "rw" );
-has path => ( is => "ro" );
+has ws    => ( is => "ro" );
+has seek  => ( is => "rw" );
+has path  => ( is => "ro" );
+has stash => ( is => "ro", default => sub { [] } );
 
 sub initialize {
 	my $self     = shift;
@@ -19,6 +20,12 @@ sub initialize {
 		cb           => sub { $self->process_events($_) for @_ },
 		parse_events => 1,
 	);
+	return $self;
+}
+
+sub handler {
+	my ( $self, $conn ) = @_;
+	$conn->emit( "log", $_ ) for @{ $self->stash };
 }
 
 sub process_events {
@@ -51,7 +58,7 @@ sub process_events {
 			}gsmx
 			)
 		{
-			chomp(my $message = $7);
+			chomp( my $message = $7 );
 			$self->emit(
 				{   date    => "$1-$2-$3T$4+0000",
 					level   => $5,
@@ -64,9 +71,11 @@ sub process_events {
 }
 
 sub emit {
-	my ($self, $message) = @_;
-	print encode_json($message), $/ if($self->ws->debug);
+	my ( $self, $message ) = @_;
+	print encode_json($message), $/ if ( $self->ws->debug );
 	$self->ws->sockets->emit( "log", $message );
+	push( @{ $self->stash }, $message );
+	shift @{ $self->stash } if @{ $self->stash } > 20;
 }
 
 1;
