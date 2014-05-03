@@ -5,3 +5,4 @@ requires "Path::Tiny";
 requires "AnyEvent::Filesys::Notify";
 requires "Plack::Builder";
 requires "Config::ZOMG";
+requires"Plack::Middleware::CrossOrigin";

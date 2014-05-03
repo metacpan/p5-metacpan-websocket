@@ -13,7 +13,7 @@ use Moo;
 has pocketio => ( is => "ro", lazy => 1, builder => "_build_pocketio" );
 has sockets  => ( is => "rw", lazy => 1, builder => "_build_sockets" );
 has config   => ( is => "ro", lazy => 1, builder => "_build_config" );
-has debug    => ( is => "ro", default => sub { shift->config->{debug} } );
+has debug => ( is => "ro", default => sub { shift->config->{debug} } );
 
 sub _build_pocketio {
 	PocketIO->new( handler => sub { } );
@@ -36,6 +36,9 @@ MetaCPAN::WebSocket::Log->new( ws => $ws, %{ $ws->config->{log} || {} } )
 	->initialize;
 
 builder {
+	enable 'CrossOrigin',
+		origins     => [qw(http://localhost:5000 https://metacpan.org)],
+		credentials => 1;
 	mount '/socket.io' => $ws->pocketio;
 	mount "/"          => sub {
 		[   200,
