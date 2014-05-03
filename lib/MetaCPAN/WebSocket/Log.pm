@@ -25,7 +25,10 @@ sub initialize {
 
 sub handler {
 	my ( $self, $conn ) = @_;
-	$conn->emit( "log", $_ ) for @{ $self->stash };
+	$conn->on("log.stash", sub {
+		my $conn = shift;
+		$conn->emit( "log", $_ ) for @{ $self->stash };
+	});
 }
 
 sub process_events {
