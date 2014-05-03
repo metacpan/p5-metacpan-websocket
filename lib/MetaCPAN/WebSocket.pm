@@ -1,7 +1,7 @@
 package MetaCPAN::WebSocket;
 
 use lib qw(lib);
-use MetaCPAN::WebSocket::Indexer;
+use MetaCPAN::WebSocket::Log;
 
 use Plack::Builder;
 use PocketIO;
@@ -21,7 +21,7 @@ sub _build_sockets {
 
 my $ws = __PACKAGE__->new;
 
-MetaCPAN::WebSocket::Indexer->new( ws => $ws )->initialize;
+MetaCPAN::WebSocket::Log->new( ws => $ws )->initialize;
 
 builder {
 	mount '/socket.io' => $ws->pocketio;
