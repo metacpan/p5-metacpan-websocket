@@ -1,15 +1,19 @@
 package MetaCPAN::WebSocket;
 
-use lib qw(lib);
+use FindBin;
+use lib "$FindBin::RealBin/../";
 use MetaCPAN::WebSocket::Log;
 
 use Plack::Builder;
 use PocketIO;
 use PocketIO::Sockets;
+use Config::ZOMG;
 use Moo;
 
 has pocketio => ( is => "ro", lazy => 1, builder => "_build_pocketio" );
 has sockets  => ( is => "rw", lazy => 1, builder => "_build_sockets" );
+has config   => ( is => "ro", lazy => 1, builder => "_build_config" );
+has debug    => ( is => "ro", default => sub { shift->config->{debug} } );
 
 sub _build_pocketio {
 	PocketIO->new( handler => sub { } );
@@ -19,9 +23,17 @@ sub _build_sockets {
 	PocketIO::Sockets->new( pool => shift->pocketio->pool );
 }
 
+sub _build_config {
+	Config::ZOMG->new(
+		name => 'config',
+		path => "$FindBin::RealBin/../../",
+	)->load;
+}
+
 my $ws = __PACKAGE__->new;
 
-MetaCPAN::WebSocket::Log->new( ws => $ws )->initialize;
+MetaCPAN::WebSocket::Log->new( ws => $ws, %{ $ws->config->{log} || {} } )
+	->initialize;
 
 builder {
 	mount '/socket.io' => $ws->pocketio;
