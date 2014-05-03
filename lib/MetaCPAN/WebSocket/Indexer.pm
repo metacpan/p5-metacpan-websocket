@@ -44,7 +44,7 @@ sub process_events {
 		$self->seek( $self->seek + length($lines) );
 		while (
 			$lines =~ m{
-				(^\d\d\d\d/\d\d/\d\d)\s
+				(^\d\d\d\d)/(\d\d)/(\d\d)\s
 				(\d\d:\d\d:\d\d)\s
 				(\w)\s
 				(\w+):\s
@@ -53,10 +53,10 @@ sub process_events {
 			)
 		{
 			$self->emit(
-				{   date    => "$1 $2 GMT+0100",
-					level   => $3,
-					script  => $4,
-					message => $5
+				{   date    => "$1-$2-$3T$4+0000",
+					level   => $5,
+					script  => $6,
+					message => $7
 				}
 			);
 		}
