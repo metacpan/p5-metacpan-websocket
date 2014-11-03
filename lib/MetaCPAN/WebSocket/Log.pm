@@ -13,6 +13,9 @@ has stash => ( is => "ro", default => sub { [] } );
 
 sub initialize {
 	my $self     = shift;
+
+	-d $self->path or die "Log dir ${\ $self->path } not found";
+
 	my $notifier = AnyEvent::Filesys::Notify->new(
 		dirs         => [ $self->path ],
 		interval     => 1,
