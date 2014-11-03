@@ -15,6 +15,7 @@ sub initialize {
 	my $self     = shift;
 
 	-d $self->path or die "Log dir ${\ $self->path } not found";
+	print STDERR $self->path, $/ if ( $self->ws->debug );
 
 	my $notifier = AnyEvent::Filesys::Notify->new(
 		dirs         => [ $self->path ],
@@ -78,7 +79,7 @@ sub process_events {
 
 sub emit {
 	my ( $self, $message ) = @_;
-	print encode_json($message), $/ if ( $self->ws->debug );
+	print STDERR encode_json($message), $/ if ( $self->ws->debug );
 	$self->ws->sockets->emit( "log", $message );
 	push( @{ $self->stash }, $message );
 	shift @{ $self->stash } if @{ $self->stash } > 20;
